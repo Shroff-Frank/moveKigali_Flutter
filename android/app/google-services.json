@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "8296393356",
+    "project_id": "movekigali-9d268",
+    "storage_bucket": "movekigali-9d268.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:8296393356:android:d33c7c2ee99110e30d69a9",
+        "android_client_info": {
+          "package_name": "com.example.movvekigali_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC97BF31u9Hl6iSp7IvY462CWzTMZYZC0I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
