@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,8 +35,13 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   String countryCode = "+250";
   String? topErrorMessage;
+  String? nameFieldError;
+  String? emailFieldError;
+  String? phoneFieldError;
+  String? passwordFieldError;
+  String? confirmFieldError;
 
-  // ── Animated gradient button ──────────────────────────────────────────────
+  // â”€â”€ Animated gradient button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   late AnimationController _animController;
   late Animation<Color?> _colorAnimation1;
   late Animation<Color?> _colorAnimation2;
@@ -88,45 +93,65 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   void _clearError() {
-    if (topErrorMessage != null) {
-      setState(() => topErrorMessage = null);
+    if (topErrorMessage != null ||
+        nameFieldError != null ||
+        emailFieldError != null ||
+        phoneFieldError != null ||
+        passwordFieldError != null ||
+        confirmFieldError != null) {
+      setState(() {
+        topErrorMessage = null;
+        nameFieldError = null;
+        emailFieldError = null;
+        phoneFieldError = null;
+        passwordFieldError = null;
+        confirmFieldError = null;
+      });
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // REGISTER — Firebase Auth + Firestore
-  // ═══════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // REGISTER â€” Firebase Auth + Firestore
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   Future<void> register() async {
     final languageCode = supportedLanguages.any((item) => item['code'] == selectedLanguage)
         ? selectedLanguage
         : 'rw';
 
-    // ── 1. Basic validation ─────────────────────────────────────────────────
-    if (nameController.text.trim().isEmpty ||
-        emailController.text.trim().isEmpty ||
-        phoneController.text.trim().isEmpty ||
-        passwordController.text.isEmpty ||
-        confirmController.text.isEmpty) {
-      setState(() => topErrorMessage = translate('please_fill_all_fields', languageCode));
-      return;
-    }
+    // â”€â”€ 1. Basic validation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    final fullName = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    final confirmPassword = confirmController.text;
+      final phoneDigits = phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final emailValid = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+').hasMatch(email);
 
-    if (passwordController.text != confirmController.text) {
-      _showSnack(translate('passwords_do_not_match', languageCode), Colors.red);
-      return;
-    }
+    setState(() {
+      topErrorMessage = null;
+      nameFieldError = fullName.isEmpty ? translate('please_fill_all_fields', languageCode) : null;
+      emailFieldError = email.isEmpty
+          ? translate('email_address', languageCode)
+          : (!emailValid ? 'Enter a valid email address' : null);
+      phoneFieldError = phoneController.text.isEmpty
+          ? translate('phone_number', languageCode)
+          : (!RegExp(r'^[0-9]{9}$').hasMatch(phoneDigits)
+              ? translate('enter_valid_phone', languageCode)
+              : null);
+      passwordFieldError = password.isEmpty
+          ? translate('password', languageCode)
+          : (!_isStrongPassword(password)
+              ? translate('password_guidelines', languageCode)
+              : null);
+      confirmFieldError = confirmPassword.isEmpty
+          ? translate('confirm_password', languageCode)
+          : (password != confirmPassword ? translate('passwords_do_not_match', languageCode) : null);
+    });
 
-    final phoneDigits = phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (!RegExp(r'^[0-9]{9}$').hasMatch(phoneDigits)) {
-      _showSnack(translate('enter_valid_phone', languageCode), Colors.orange);
-      return;
-    }
-
-    if (!_isStrongPassword(passwordController.text)) {
-      _showSnack(
-        "Choose a stronger password: 8+ chars, uppercase, lowercase, number, and symbol",
-        Colors.orange,
-      );
+    if (nameFieldError != null ||
+        emailFieldError != null ||
+        phoneFieldError != null ||
+        passwordFieldError != null ||
+        confirmFieldError != null) {
       return;
     }
 
@@ -145,7 +170,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 
     var authSucceeded = false;
     try {
-      // ── 2. Create account in Firebase Auth ──────────────────────────────
+      // â”€â”€ 2. Create account in Firebase Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       final UserCredential credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
             email:    emailController.text.trim(),
@@ -155,11 +180,11 @@ class _RegisterScreenState extends State<RegisterScreen>
       final User? user = credential.user;
       if (user == null) throw Exception("User creation failed");
 
-      // ── 3. Update display name in Firebase Auth ─────────────────────────
+      // â”€â”€ 3. Update display name in Firebase Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       await user.updateDisplayName(nameController.text.trim());
       await user.sendEmailVerification();
 
-      // ── 4. Save full profile to Firestore via shared service ───────────
+      // â”€â”€ 4. Save full profile to Firestore via shared service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       final String fullPhone = "$countryCode$phoneDigits";
       final userData = user_state.UserData(
         uid:          user.uid,
@@ -185,9 +210,9 @@ class _RegisterScreenState extends State<RegisterScreen>
         rethrow;
       }
 
-      // ── 5. Navigate to HomeScreen ────────────────────────────────────────
+      // â”€â”€ 5. Navigate to HomeScreen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (!mounted) return;
-      _showSnack("Account created successfully! 🎉 Please check your email for verification.", Colors.green);
+      _showSnack("Account created successfully! ðŸŽ‰ Please check your email for verification.", Colors.green);
 
       await Future.delayed(const Duration(milliseconds: 800));
       if (!mounted) return;
@@ -206,7 +231,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       authSucceeded = true;
 
     } on FirebaseAuthException catch (e) {
-      // ── Firebase Auth errors with friendly messages ─────────────────────
+      // â”€â”€ Firebase Auth errors with friendly messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       String message;
       switch (e.code) {
         case 'email-already-in-use':
@@ -241,7 +266,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     }
   }
 
-  // ── Helper: show snackbar ─────────────────────────────────────────────────
+  // â”€â”€ Helper: show snackbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   bool _isStrongPassword(String value) {
     final hasUpper = value.contains(RegExp(r'[A-Z]'));
     final hasLower = value.contains(RegExp(r'[a-z]'));
@@ -263,9 +288,9 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // BUILD — UI stays exactly the same
-  // ═══════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // BUILD â€” UI stays exactly the same
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   @override
   Widget build(BuildContext context) {
     final languageCode = supportedLanguages.any((item) => item['code'] == selectedLanguage)
@@ -367,6 +392,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                     nameController,
                                     translate('full_name', languageCode),
                                     Icons.person,
+                                    errorText: nameFieldError,
                                     onChanged: (_) => _clearError(),
                                   ),
                                   const SizedBox(height: 16),
@@ -375,18 +401,21 @@ class _RegisterScreenState extends State<RegisterScreen>
                                     emailController,
                                     translate('email_address', languageCode),
                                     Icons.email,
+                                    errorText: emailFieldError,
                                     onChanged: (_) => _clearError(),
                                   ),
                                   const SizedBox(height: 16),
                                   fieldLabel('${translate('phone', languageCode)} *'),
-                                  phoneField(languageCode),
+                                  phoneField(languageCode, errorText: phoneFieldError),
                                   const SizedBox(height: 16),
                                   fieldLabel('${translate('password', languageCode)} *'),
-                                  passwordField(languageCode),
+                                  passwordField(languageCode, errorText: passwordFieldError, controller: passwordController),
+                                  const SizedBox(height: 16),
+                                  fieldLabel('${translate('confirm_password', languageCode)} *'),
+                                  passwordField(languageCode, errorText: confirmFieldError, controller: confirmController),
                                   const SizedBox(height: 8),
                                   passwordRequirements(),
                                   const SizedBox(height: 16),
-                        const SizedBox(height: 20),
                                   loadingBranding(),
                                   animatedSignUpButton(languageCode),
                                   const SizedBox(height: 12),
@@ -433,20 +462,26 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
-  // ── Widgets (unchanged) ───────────────────────────────────────────────────
-  Widget cardInputField(
-      TextEditingController controller, String hint, IconData icon,
-      {ValueChanged<String>? onChanged}) {
+  // â”€â”€ Widgets (unchanged) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    Widget cardInputField(
+      TextEditingController controller,
+      String hint,
+      IconData icon,
+      {String? errorText,
+      ValueChanged<String>? onChanged,
+      TextInputType keyboardType = TextInputType.text}) {
     return Material(
       elevation: 6,
       borderRadius: BorderRadius.circular(16),
       shadowColor: Colors.black26,
       child: TextField(
         controller: controller,
+        keyboardType: keyboardType,
         onChanged: onChanged,
         style: const TextStyle(color: Colors.black87),
         decoration: InputDecoration(
           hintText: hint,
+          errorText: errorText,
           hintStyle: const TextStyle(color: Colors.black45),
           prefixIcon: Icon(icon, color: Colors.black45),
           filled: true,
@@ -459,7 +494,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
-  Widget phoneField(String languageCode) {
+  Widget phoneField(String languageCode, {String? errorText}) {
     return Material(
       elevation: 6,
       borderRadius: BorderRadius.circular(16),
@@ -479,20 +514,22 @@ class _RegisterScreenState extends State<RegisterScreen>
                   setState(() => countryCode = code.dialCode ?? "+250"),
             ),
             const SizedBox(width: 6),
-            Expanded(
-              child: TextField(
-                controller: phoneController,
-                keyboardType: TextInputType.phone,
-                maxLength: 9,
-                maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(
-                  hintText: translate('phone_number', languageCode),
-                  border: InputBorder.none,
-                  counterText: '',
-                ),
-              ),
-            ),
+               Expanded(
+                 child: TextField(
+                   controller: phoneController,
+                   keyboardType: TextInputType.phone,
+                   maxLength: 9,
+                   maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                   onChanged: (_) => _clearError(),
+                   decoration: InputDecoration(
+                     hintText: translate('phone_number', languageCode),
+                     errorText: errorText,
+                     border: InputBorder.none,
+                     counterText: '',
+                   ),
+                 ),
+               ),
           ],
         ),
       ),
@@ -523,24 +560,34 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
-  Widget passwordField(String languageCode) {
+  Widget passwordField(String languageCode,
+      {String? errorText, required TextEditingController controller}) {
     return Material(
       elevation: 6,
       borderRadius: BorderRadius.circular(16),
       shadowColor: Colors.black26,
       child: TextField(
-        controller: passwordController,
-        obscureText: hidePassword,
+        controller: controller,
+        obscureText: controller == confirmController ? hideConfirm : hidePassword,
         style: const TextStyle(color: Colors.black87),
         decoration: InputDecoration(
-          hintText: translate('password', languageCode),
+          hintText: errorText ?? translate('password', languageCode),
           hintStyle: const TextStyle(color: Colors.black45),
+          errorText: errorText,
           prefixIcon: const Icon(Icons.lock, color: Colors.black45),
           suffixIcon: IconButton(
             icon: Icon(
-                hidePassword ? Icons.visibility_off : Icons.visibility,
+                controller == confirmController
+                    ? (hideConfirm ? Icons.visibility_off : Icons.visibility)
+                    : (hidePassword ? Icons.visibility_off : Icons.visibility),
                 color: Colors.black45),
-            onPressed: () => setState(() => hidePassword = !hidePassword),
+            onPressed: () => setState(() {
+              if (controller == confirmController) {
+                hideConfirm = !hideConfirm;
+              } else {
+                hidePassword = !hidePassword;
+              }
+            }),
           ),
           filled: true,
           fillColor: Colors.white,

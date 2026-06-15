@@ -342,10 +342,15 @@ class _LoginScreenState extends State<LoginScreen>
                             child: _loginChoiceButton(
                               label: translate('phone', languageCode),
                               selected: usePhoneLogin,
-                              onTap: () => setState(() {
-                                usePhoneLogin = true;
-                                _clearError();
-                              }),
+                              onTap: () {
+                                if (!usePhoneLogin) {
+                                  passwordController.clear();
+                                }
+                                setState(() {
+                                  usePhoneLogin = true;
+                                  _clearError();
+                                });
+                              },
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -353,10 +358,15 @@ class _LoginScreenState extends State<LoginScreen>
                             child: _loginChoiceButton(
                               label: translate('email', languageCode),
                               selected: !usePhoneLogin,
-                              onTap: () => setState(() {
-                                usePhoneLogin = false;
-                                _clearError();
-                              }),
+                              onTap: () {
+                                if (usePhoneLogin) {
+                                  passwordController.clear();
+                                }
+                                setState(() {
+                                  usePhoneLogin = false;
+                                  _clearError();
+                                });
+                              },
                             ),
                           ),
                         ],

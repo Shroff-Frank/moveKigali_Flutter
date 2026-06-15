@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^Set-Location -Path 'D:\\\\Project\\\\FRONTEND\\\\moveKigali_Flutter'; \\$i=0; Get-Content 'lib/screens/login/register/register_screen\\.dart' \\| ForEach-Object \\{ \\$i\\+\\+; if \\(\\$i -ge 120 -and \\$i -le 145\\) \\{ Write-Host \\(\"Line \\{0\\}: \\{1\\}\" -f \\$i, \\$_\\) \\} \\}$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

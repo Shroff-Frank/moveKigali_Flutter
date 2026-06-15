@@ -83,7 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       );
                     },
                     child: const Text(
-                      "Skip",
+                      "Taruka",
                       style: TextStyle(color: Colors.white70),
                     ),
                   ),
@@ -117,9 +117,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 if (onboardingStep == 0) ...[
                                   buildPage(
                                     image: "assets/images/anywhere.png",
-                                    title: "Book Bus Tickets\nFrom Anywhere",
+                                    title: "Gura itike ya bus aho uri hose",
                                     subtitle:
-                                        "Book through moveKigali and get tickets delivered directly to your doorstep.",
+                                        "Gura itike yawe ukoresheje MoveKigali, uyigezweho aho utuye.",
                                     screenWidth: screenWidth,
                                     screenHeight: screenHeight,
                                   ),
@@ -149,7 +149,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                             onTap: () => setState(() => onboardingStep = 1),
                                             child: const Center(
                                               child: Text(
-                                                "Get Started",
+                                                "Tangira",
                                                 style: TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.bold,
@@ -166,9 +166,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 ] else ...[
                                   buildPage(
                                     image: "assets/images/track.png",
-                                    title: "Track Your Trip\nIn Real Time",
+                                    title: "Kurikirana urugendo rwawe mu gihe nyacyo.",
                                     subtitle:
-                                        "Monitor your location and trip status live. Never miss your destination again.",
+                                        "Menya aho ugeze n' imiterere y'urugendo rwawe. Ntuzongera kurenga cyangwa kubura aho ugomba kugera.",
                                     screenWidth: screenWidth,
                                     screenHeight: screenHeight,
                                   ),
@@ -206,7 +206,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                             },
                                             child: const Center(
                                               child: Text(
-                                                "Continue",
+                                                  "Komeza",
                                                 style: TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.bold,
