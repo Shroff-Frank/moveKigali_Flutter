@@ -126,25 +126,28 @@ class _RegisterScreenState extends State<RegisterScreen>
       final phoneDigits = phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
       final emailValid = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+').hasMatch(email);
 
+    final passwordErrorText = password.isEmpty
+        ? translate('password', languageCode)
+        : (!_isStrongPassword(password)
+            ? translate('password_guidelines', languageCode)
+            : null);
+    final confirmErrorText = confirmPassword.isEmpty
+        ? translate('confirm_password', languageCode)
+        : (password != confirmPassword ? translate('passwords_do_not_match', languageCode) : null);
+
     setState(() {
       topErrorMessage = null;
       nameFieldError = fullName.isEmpty ? translate('please_fill_all_fields', languageCode) : null;
       emailFieldError = email.isEmpty
           ? translate('email_address', languageCode)
-          : (!emailValid ? 'Enter a valid email address' : null);
+          : (!emailValid ? translate('enter_valid_email', languageCode) : null);
       phoneFieldError = phoneController.text.isEmpty
           ? translate('phone_number', languageCode)
           : (!RegExp(r'^[0-9]{9}$').hasMatch(phoneDigits)
               ? translate('enter_valid_phone', languageCode)
               : null);
-      passwordFieldError = password.isEmpty
-          ? translate('password', languageCode)
-          : (!_isStrongPassword(password)
-              ? translate('password_guidelines', languageCode)
-              : null);
-      confirmFieldError = confirmPassword.isEmpty
-          ? translate('confirm_password', languageCode)
-          : (password != confirmPassword ? translate('passwords_do_not_match', languageCode) : null);
+      passwordFieldError = passwordErrorText;
+      confirmFieldError = confirmErrorText;
     });
 
     if (nameFieldError != null ||
@@ -152,6 +155,12 @@ class _RegisterScreenState extends State<RegisterScreen>
         phoneFieldError != null ||
         passwordFieldError != null ||
         confirmFieldError != null) {
+      if (passwordFieldError != null) {
+        passwordController.clear();
+        confirmController.clear();
+      } else if (confirmFieldError != null) {
+        confirmController.clear();
+      }
       return;
     }
 
@@ -551,11 +560,23 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   Widget fieldLabel(String label) {
+    final hasAsterisk = label.trim().endsWith('*');
+    final plainText = hasAsterisk ? label.trim().substring(0, label.trim().length - 1).trimRight() : label;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
-      child: Text(
-        label,
-        style: const TextStyle(color: Colors.white70, fontSize: 13),
+      child: RichText(
+        text: TextSpan(
+          text: plainText.isNotEmpty ? '$plainText ' : '',
+          style: const TextStyle(color: Colors.white70, fontSize: 13),
+          children: [
+            if (hasAsterisk)
+              const TextSpan(
+                text: '*',
+                style: TextStyle(color: Colors.orangeAccent, fontSize: 13),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -580,7 +601,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 controller == confirmController
                     ? (hideConfirm ? Icons.visibility_off : Icons.visibility)
                     : (hidePassword ? Icons.visibility_off : Icons.visibility),
-                color: Colors.black45),
+                color: Colors.orangeAccent),
             onPressed: () => setState(() {
               if (controller == confirmController) {
                 hideConfirm = !hideConfirm;

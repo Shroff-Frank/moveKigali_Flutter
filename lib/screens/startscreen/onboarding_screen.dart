@@ -82,9 +82,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         MaterialPageRoute(builder: (_) => LoginScreen(languageCode: selectedLanguage)),
                       );
                     },
-                    child: const Text(
-                      "Taruka",
-                      style: TextStyle(color: Colors.white70),
+                    child: Text(
+                      translate('onboarding_skip', selectedLanguage),
+                      style: const TextStyle(color: Colors.white70),
                     ),
                   ),
                 ],
@@ -117,9 +117,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 if (onboardingStep == 0) ...[
                                   buildPage(
                                     image: "assets/images/anywhere.png",
-                                    title: "Gura itike ya bus aho uri hose",
-                                    subtitle:
-                                        "Gura itike yawe ukoresheje MoveKigali, uyigezweho aho utuye.",
+                                    title: translate('onboarding_title_1', selectedLanguage),
+                                    subtitle: translate('onboarding_subtitle_1', selectedLanguage),
                                     screenWidth: screenWidth,
                                     screenHeight: screenHeight,
                                   ),
@@ -147,10 +146,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                           child: InkWell(
                                             borderRadius: BorderRadius.circular(16),
                                             onTap: () => setState(() => onboardingStep = 1),
-                                            child: const Center(
+                                            child: Center(
                                               child: Text(
-                                                "Tangira",
-                                                style: TextStyle(
+                                                translate('onboarding_start', selectedLanguage),
+                                                style: const TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.white,
@@ -166,9 +165,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 ] else ...[
                                   buildPage(
                                     image: "assets/images/track.png",
-                                    title: "Kurikirana urugendo rwawe mu gihe nyacyo.",
-                                    subtitle:
-                                        "Menya aho ugeze n' imiterere y'urugendo rwawe. Ntuzongera kurenga cyangwa kubura aho ugomba kugera.",
+                                    title: translate('onboarding_title_2', selectedLanguage),
+                                    subtitle: translate('onboarding_subtitle_2', selectedLanguage),
                                     screenWidth: screenWidth,
                                     screenHeight: screenHeight,
                                   ),
@@ -204,10 +202,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                                 MaterialPageRoute(builder: (_) => LoginScreen(languageCode: selectedLanguage)),
                                               );
                                             },
-                                            child: const Center(
+                                            child: Center(
                                               child: Text(
-                                                  "Komeza",
-                                                style: TextStyle(
+                                                translate('onboarding_continue', selectedLanguage),
+                                                style: const TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.white,
