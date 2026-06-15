@@ -59,8 +59,6 @@ const Map<String, Map<String, String>> _translations = {
     'buy_ticket': 'Buy Ticket',
     'summary': 'Summary',
     'complete_form': 'Complete the form below to purchase moveKigali tickets',
-    'travel_date': 'Travel Date',
-    'redeem': 'Redeem',
     'please_select_a_departure_point': 'Please select a departure point',
     'please_select_a_destination': 'Please select a destination',
     'depart_same_warning': 'Departure and destination cannot be the same',
