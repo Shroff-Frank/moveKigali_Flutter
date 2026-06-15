@@ -27,7 +27,6 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   bool hidePassword = true;
   bool hideConfirm  = true;
-  bool agreeTerms   = false;
   bool isLoading    = false;
   String selectedLanguage = 'rw';
 
@@ -106,11 +105,6 @@ class _RegisterScreenState extends State<RegisterScreen>
         passwordController.text.isEmpty ||
         confirmController.text.isEmpty) {
       setState(() => topErrorMessage = translate('please_fill_all_fields', languageCode));
-      return;
-    }
-
-    if (!agreeTerms) {
-      setState(() => topErrorMessage = translate('please_accept_terms', languageCode));
       return;
     }
 
@@ -284,13 +278,15 @@ class _RegisterScreenState extends State<RegisterScreen>
                         icon: const Icon(Icons.menu, color: Colors.white),
                       ),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          translate('sign_up', languageCode),
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                      const Expanded(
+                        child: Center(
+                          child: Text(
+                            'moveKigali Account',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -313,9 +309,22 @@ class _RegisterScreenState extends State<RegisterScreen>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  Text(
-                                    translate('create_account_prompt', languageCode),
-                                    style: const TextStyle(color: Colors.white70, fontSize: 15),
+                                  const Text(
+                                    'moveKigali Account',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'Andika umwirondo wawe kugira ngo ukomeze',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 13,
+                                    ),
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 14),
@@ -338,7 +347,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   fieldLabel(translate('full_name', languageCode)),
                                   cardInputField(
                                     nameController,
-                                    translate('full_name', languageCode),
+                                    requiredHint(translate('full_name', languageCode)),
                                     Icons.person,
                                     onChanged: (_) => _clearError(),
                                   ),
@@ -346,7 +355,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   fieldLabel(translate('email_address', languageCode)),
                                   cardInputField(
                                     emailController,
-                                    translate('email_address', languageCode),
+                                    requiredHint(translate('email_address', languageCode)),
                                     Icons.email,
                                     onChanged: (_) => _clearError(),
                                   ),
@@ -364,6 +373,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   const SizedBox(height: 18),
                                   termsRow(languageCode),
                                   const SizedBox(height: 20),
+                                  loadingBranding(),
                                   animatedSignUpButton(languageCode),
                                   const SizedBox(height: 12),
                                   Row(
@@ -463,7 +473,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 maxLengthEnforcement: MaxLengthEnforcement.enforced,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
-                  hintText: translate('phone_number', languageCode),
+                  hintText: requiredHint(translate('phone_number', languageCode)),
                   border: InputBorder.none,
                   counterText: '',
                 ),
@@ -513,7 +523,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         obscureText: hidePassword,
         style: const TextStyle(color: Colors.black87),
         decoration: InputDecoration(
-          hintText: translate('password', languageCode),
+          hintText: requiredHint(translate('password', languageCode)),
           hintStyle: const TextStyle(color: Colors.black45),
           prefixIcon: const Icon(Icons.lock, color: Colors.black45),
           suffixIcon: IconButton(
@@ -532,6 +542,11 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
+  String requiredHint(String value) {
+    final trimmed = value.trim();
+    return trimmed.endsWith('*') ? trimmed : '$trimmed *';
+  }
+
   Widget confirmPasswordField(String languageCode) {
     return Material(
       elevation: 6,
@@ -542,7 +557,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         obscureText: hideConfirm,
         style: const TextStyle(color: Colors.black87),
         decoration: InputDecoration(
-          hintText: translate('confirm_password', languageCode),
+          hintText: requiredHint(translate('confirm_password', languageCode)),
           hintStyle: const TextStyle(color: Colors.black45),
           prefixIcon: const Icon(Icons.lock, color: Colors.black45),
           suffixIcon: IconButton(
@@ -562,49 +577,56 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   Widget termsRow(String languageCode) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 20,
-          height: 20,
-          child: Checkbox(
-            visualDensity: VisualDensity.compact,
-            value: agreeTerms,
-            activeColor: Colors.orange,
-            checkColor: Colors.white,
-            onChanged: (value) =>
-                setState(() => agreeTerms = value ?? false),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: languageCode == 'rw'
-              ? RichText(
-                  text: TextSpan(
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
-                    children: [
-                      const TextSpan(text: 'Mu kwinjira, wemera '),
-                      TextSpan(
-                        text: 'Amategeko agenga imikorere',
-                        style: const TextStyle(color: Colors.orangeAccent),
-                      ),
-                      const TextSpan(text: ' harimo na '),
-                      TextSpan(
-                        text: 'Politiki y\'ibanga',
-                        style: const TextStyle(color: Colors.orangeAccent),
-                      ),
-                      const TextSpan(text: ' ya moveKigali.'),
-                    ],
-                  ),
-                )
-              : Text(
-                  translate('agree_terms', languageCode),
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
+    return languageCode == 'rw'
+        ? RichText(
+            text: TextSpan(
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+              children: [
+                const TextSpan(text: 'Mu kwinjira, wemera '),
+                TextSpan(
+                  text: 'Amategeko agenga imikorere',
+                  style: const TextStyle(color: Colors.orangeAccent),
                 ),
-        ),
-      ],
-    );
+                const TextSpan(text: ' harimo na '),
+                TextSpan(
+                  text: 'Politiki y\'ibanga',
+                  style: const TextStyle(color: Colors.orangeAccent),
+                ),
+                const TextSpan(text: ' ya moveKigali.'),
+              ],
+            ),
+          )
+        : Text(
+            translate('agree_terms', languageCode),
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+          );
+  }
+
+  Widget loadingBranding() {
+    return isLoading
+        ? Column(
+            children: const [
+              Text(
+                'movekigali',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
+              ),
+              SizedBox(height: 12),
+            ],
+          )
+        : const SizedBox.shrink();
   }
 
   Widget animatedSignUpButton(String languageCode) {

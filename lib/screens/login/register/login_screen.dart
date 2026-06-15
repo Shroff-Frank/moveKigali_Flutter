@@ -289,14 +289,22 @@ class _LoginScreenState extends State<LoginScreen>
                             onPressed: _openLanguagePicker,
                             icon: const Icon(Icons.menu, color: Colors.white),
                           ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Center(
+                              child: Text(
+                                'moveKigali Account',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-                      Center(
-                        child: Image.asset(
-                          "assets/images/logo1.png",
-                          width: 90,
-                        ),
-                      ),
+                      const SizedBox(height: 18),
                       const SizedBox(height: 18),
                       Text(
                         translate('sign_in_to_movekigali', languageCode),
@@ -364,9 +372,9 @@ class _LoginScreenState extends State<LoginScreen>
                       const SizedBox(height: 8),
                       cardInputField(
                         controller: emailController,
-                        hint: usePhoneLogin
+                        hint: requiredHint(usePhoneLogin
                             ? translate('phone_number', languageCode)
-                            : translate('email_address', languageCode),
+                            : translate('email_address', languageCode)),
                         icon: Icons.person,
                         keyboardType: usePhoneLogin
                             ? TextInputType.phone
@@ -381,6 +389,7 @@ class _LoginScreenState extends State<LoginScreen>
                       const SizedBox(height: 8),
                       passwordField(),
                       const SizedBox(height: 12),
+                      loadingBranding(),
                       rememberForgotRow(languageCode),
                       const SizedBox(height: 16),
                       animatedLoginButton(languageCode),
@@ -410,6 +419,11 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   // ── Widgets (unchanged) ───────────────────────────────────────────────────
+  String requiredHint(String value) {
+    final trimmed = value.trim();
+    return trimmed.endsWith('*') ? trimmed : '$trimmed *';
+  }
+
   Widget cardInputField({
     required TextEditingController controller,
     required String hint,
@@ -450,7 +464,7 @@ class _LoginScreenState extends State<LoginScreen>
         obscureText: hidePassword,
         style: const TextStyle(color: Colors.black87),
         decoration: InputDecoration(
-          hintText: translate('password', languageCode),
+          hintText: requiredHint(translate('password', languageCode)),
           prefixIcon: const Icon(Icons.lock, color: Colors.black45),
           suffixIcon: IconButton(
             icon: Icon(
@@ -496,25 +510,8 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget rememberForgotRow(String languageCode) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Row(children: [
-          SizedBox(
-            width: 18,
-            height: 18,
-            child: Checkbox(
-              visualDensity: VisualDensity.compact,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              value: rememberMe,
-              activeColor: Colors.orange,
-              onChanged: (value) =>
-                  setState(() => rememberMe = value ?? false),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(translate('remember_me', languageCode),
-              style: const TextStyle(color: Colors.white)),
-        ]),
         TextButton(
           onPressed: forgotPassword,
           child: Text(
@@ -526,6 +523,33 @@ class _LoginScreenState extends State<LoginScreen>
         ),
       ],
     );
+  }
+
+  Widget loadingBranding() {
+    return isLoading
+        ? Column(
+            children: const [
+              Text(
+                'movekigali',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
+              ),
+              SizedBox(height: 12),
+            ],
+          )
+        : const SizedBox.shrink();
   }
 
   Widget animatedLoginButton(String languageCode) {
