@@ -40,14 +40,14 @@ const List<Map<String, String>> _kLanguages = [
 class _DrawerItemData {
   final IconData icon;
   final Color    iconColor;
-  final String   title;
+  final String   titleKey;
   final bool     isLogout;
   final bool     isDarkToggle;
   final bool     isLanguage;
   const _DrawerItemData({
     required this.icon,
     required this.iconColor,
-    required this.title,
+    required this.titleKey,
     this.isLogout     = false,
     this.isDarkToggle = false,
     this.isLanguage   = false,
@@ -1549,7 +1549,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                 Row(children: [
-                  _chip(Icons.restaurant, '1 Meal', Colors.orange),
+                  _chip(Icons.restaurant, '1 ${_t('meal')}', Colors.orange),
                   const SizedBox(width: 8),
                   _chip(Icons.person,
                       '$_people Passenger${_people > 1 ? 's' : ''}',
@@ -1563,14 +1563,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration: BoxDecoration(
                         color: Colors.orange,
                         borderRadius: BorderRadius.circular(25)),
-                    child: const Row(children: [
-                      Text('Detail',
-                          style: TextStyle(
+                    child: Row(children: [
+                      Text(_t('detail'),
+                          style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 13)),
-                      SizedBox(width: 4),
-                      Icon(Icons.arrow_forward,
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_forward,
                           color: Colors.white, size: 14),
                     ]),
                   ),
@@ -1689,6 +1689,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 price: e['price'] as int,
                 paymentMethod: e['paymentMethod'] as String? ?? 'Unknown',
                 status: e['status'] as String? ?? 'Not yet Scanned',
+                languageCode: _language,
                 id: e['id'] as String,
                 onDelete: _deleteHistory, isDark: _isDarkMode,
               )),
@@ -1726,10 +1727,10 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _navItem(Icons.home_rounded,    'Home',     0),
-              _navItem(Icons.history_rounded, 'Activity', 1),
-              _navItem(Icons.map_rounded,     'Live Map', 2),
-              _navItem(Icons.person_rounded,  'Profile',  3),
+              _navItem(Icons.home_rounded,    _t('home'),      0),
+              _navItem(Icons.history_rounded, _t('activity'),  1),
+              _navItem(Icons.map_rounded,     _t('live_map'),  2),
+              _navItem(Icons.person_rounded,  _t('profile'),   3),
             ],
           ),
         ),
@@ -1779,31 +1780,31 @@ class _HomeScreenState extends State<HomeScreen> {
     final headerBg  = _isDarkMode ? const Color(0xFF162028) : Colors.white;
 
     final items = <_DrawerItemData>[
-      const _DrawerItemData(icon: Icons.person_outline,  iconColor: Color(0xFF4A90D9), title: 'Profile'),
-      const _DrawerItemData(icon: Icons.history,         iconColor: Color(0xFF7B61FF), title: 'Trip History'),
-      const _DrawerItemData(icon: Icons.payment,         iconColor: Color(0xFF27AE60), title: 'Payment Methods'),
-      const _DrawerItemData(icon: Icons.card_giftcard,   iconColor: Color(0xFFE67E22), title: 'Buspoints'),
-      const _DrawerItemData(icon: Icons.notifications_outlined, iconColor: Color(0xFFE74C3C), title: 'Notifications'),
-      const _DrawerItemData(icon: Icons.language,        iconColor: Color(0xFF1ABC9C), title: 'Language', isLanguage: true),
-      const _DrawerItemData(icon: Icons.help_outline,    iconColor: Color(0xFF3498DB), title: 'Help Center'),
-      const _DrawerItemData(icon: Icons.info_outline,    iconColor: Color(0xFF9B59B6), title: 'About'),
-      const _DrawerItemData(icon: Icons.description,     iconColor: Color(0xFF2ECC71), title: 'Terms & Conditions'),
-      const _DrawerItemData(icon: Icons.dark_mode_rounded, iconColor: Color(0xFF5B8DEF), title: 'Dark Mode', isDarkToggle: true),
-      const _DrawerItemData(icon: Icons.logout,          iconColor: Color(0xFFE74C3C), title: 'Logout', isLogout: true),
+      const _DrawerItemData(icon: Icons.person_outline,  iconColor: Color(0xFF4A90D9), titleKey: 'profile'),
+      const _DrawerItemData(icon: Icons.history,         iconColor: Color(0xFF7B61FF), titleKey: 'trip_history'),
+      const _DrawerItemData(icon: Icons.payment,         iconColor: Color(0xFF27AE60), titleKey: 'payment_methods'),
+      const _DrawerItemData(icon: Icons.card_giftcard,   iconColor: Color(0xFFE67E22), titleKey: 'buspoints'),
+      const _DrawerItemData(icon: Icons.notifications_outlined, iconColor: Color(0xFFE74C3C), titleKey: 'notifications'),
+      const _DrawerItemData(icon: Icons.language,        iconColor: Color(0xFF1ABC9C), titleKey: 'language', isLanguage: true),
+      const _DrawerItemData(icon: Icons.help_outline,    iconColor: Color(0xFF3498DB), titleKey: 'help_center'),
+      const _DrawerItemData(icon: Icons.info_outline,    iconColor: Color(0xFF9B59B6), titleKey: 'about'),
+      const _DrawerItemData(icon: Icons.description,     iconColor: Color(0xFF2ECC71), titleKey: 'terms_conditions'),
+      const _DrawerItemData(icon: Icons.dark_mode_rounded, iconColor: Color(0xFF5B8DEF), titleKey: 'dark_mode', isDarkToggle: true),
+      const _DrawerItemData(icon: Icons.logout,          iconColor: Color(0xFFE74C3C), titleKey: 'logout', isLogout: true),
     ];
 
     VoidCallback? getAction(_DrawerItemData item) {
       if (item.isDarkToggle || item.isLogout) return null;
       if (item.isLanguage) return _openLanguagePicker;
-      switch (item.title) {
-        case 'Profile':          return _profile;
-        case 'Trip History':     return _viewAll;
-        case 'Payment Methods':  return _payments;
-        case 'Buspoints':        return _redeem;
-        case 'Notifications':    return () { _closeDrawer(); _notifs(); };
-        case 'Help Center':      return _help;
-        case 'About':            return _about;
-        case 'Terms & Conditions': return _terms;
+      switch (item.titleKey) {
+        case 'profile':          return _profile;
+        case 'trip_history':     return _viewAll;
+        case 'payment_methods':  return _payments;
+        case 'buspoints':        return _redeem;
+        case 'notifications':    return () { _closeDrawer(); _notifs(); };
+        case 'help_center':      return _help;
+        case 'about':            return _about;
+        case 'terms_conditions': return _terms;
         default:                 return null;
       }
     }
@@ -1974,7 +1975,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(data.title,
+                          Text(translate(data.titleKey, _language),
                               style: TextStyle(
                                   color: textColor,
                                   fontSize: 14.5,
@@ -2005,7 +2006,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         materialTapTargetSize:
                             MaterialTapTargetSize.shrinkWrap,
                       )
-                    else if (data.title == 'Notifications' &&
+                    else if (data.titleKey == 'notifications' &&
                         _unreadCount > 0)
                       // Show badge in drawer too
                       Container(
@@ -2092,6 +2093,7 @@ class _HistoryTile extends StatelessWidget {
   final String id;
   final void Function(String) onDelete;
   final bool isDark;
+  final String languageCode;
 
   const _HistoryTile({
     required this.from,          required this.to,
@@ -2100,6 +2102,7 @@ class _HistoryTile extends StatelessWidget {
     required this.status,
     required this.id,
     required this.onDelete,
+    required this.languageCode,
     this.isDark = false,
   });
 
@@ -2158,7 +2161,7 @@ class _HistoryTile extends StatelessWidget {
                   style: TextStyle(fontSize: 11, color: subCol)),
             ]),
             const SizedBox(height: 6),
-            Text('Paid via $paymentMethod',
+            Text('${translate('paid_via', languageCode)} $paymentMethod',
                 style: TextStyle(
                     fontSize: 11,
                     fontWeight: isDark ? FontWeight.w700 : FontWeight.w600,
@@ -2172,7 +2175,10 @@ class _HistoryTile extends StatelessWidget {
                     : Colors.orange.withAlpha(18),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(status,
+              child: Text(
+                  status == 'Not yet Scanned'
+                      ? translate('not_yet_scanned', languageCode)
+                      : status,
                   style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
@@ -3279,6 +3285,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   price: e['price'] as int,
                   paymentMethod: e['paymentMethod'] as String? ?? 'Unknown',
                   status: e['status'] as String? ?? 'Not yet Scanned',
+                  languageCode: widget.languageCode,
                   id: e['id'] as String,
                   onDelete: (id) {
                     widget.onDelete(id);

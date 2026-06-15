@@ -487,7 +487,7 @@ class _LoginScreenState extends State<LoginScreen>
           suffixIcon: IconButton(
             icon: Icon(
                 hidePassword ? Icons.visibility_off : Icons.visibility,
-                color: Colors.black45),
+                color: Colors.orangeAccent),
             onPressed: () => setState(() => hidePassword = !hidePassword),
           ),
           filled: true,
