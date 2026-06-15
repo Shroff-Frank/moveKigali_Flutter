@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:movekigali/utils/localization.dart';
 import '../../dashboard/home_screen.dart';
+import '../../shared/loading_screen.dart';
 import 'register_screen.dart';
 import 'forgotpassword.dart';
 
@@ -96,11 +97,20 @@ class _LoginScreenState extends State<LoginScreen>
       return;
     }
 
+    if (!mounted) return;
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => const LoadingScreen(
+        label: 'movekigali',
+        message: 'Signing in...',
+      ),
+    ));
+
     setState(() {
       isLoading = true;
       topErrorMessage = null;
     });
 
+    var authSucceeded = false;
     try {
       String email = identifier;
       if (usePhoneLogin) {
@@ -144,6 +154,7 @@ class _LoginScreenState extends State<LoginScreen>
       final User? user = credential.user;
       if (user == null) throw Exception('Login failed');
 
+      authSucceeded = true;
       debugPrint('✅ Logged in: ${user.uid}');
 
       // ── 3. Load profile from Firestore ───────────────────────────────────
@@ -222,7 +233,9 @@ class _LoginScreenState extends State<LoginScreen>
       debugPrint('Login error: $e');
 
     } finally {
-      if (mounted) setState(() => isLoading = false);
+      if (mounted && !authSucceeded) {
+        Navigator.of(context).pop();
+      }
     }
   }
 
@@ -372,9 +385,9 @@ class _LoginScreenState extends State<LoginScreen>
                       const SizedBox(height: 8),
                       cardInputField(
                         controller: emailController,
-                        hint: requiredHint(usePhoneLogin
+                        hint: usePhoneLogin
                             ? translate('phone_number', languageCode)
-                            : translate('email_address', languageCode)),
+                            : translate('email_address', languageCode),
                         icon: Icons.person,
                         keyboardType: usePhoneLogin
                             ? TextInputType.phone
@@ -419,11 +432,6 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   // ── Widgets (unchanged) ───────────────────────────────────────────────────
-  String requiredHint(String value) {
-    final trimmed = value.trim();
-    return trimmed.endsWith('*') ? trimmed : '$trimmed *';
-  }
-
   Widget cardInputField({
     required TextEditingController controller,
     required String hint,
@@ -464,7 +472,7 @@ class _LoginScreenState extends State<LoginScreen>
         obscureText: hidePassword,
         style: const TextStyle(color: Colors.black87),
         decoration: InputDecoration(
-          hintText: requiredHint(translate('password', languageCode)),
+          hintText: translate('password', languageCode),
           prefixIcon: const Icon(Icons.lock, color: Colors.black45),
           suffixIcon: IconButton(
             icon: Icon(
@@ -526,30 +534,7 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget loadingBranding() {
-    return isLoading
-        ? Column(
-            children: const [
-              Text(
-                'movekigali',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 8),
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2.5,
-                ),
-              ),
-              SizedBox(height: 12),
-            ],
-          )
-        : const SizedBox.shrink();
+    return const SizedBox.shrink();
   }
 
   Widget animatedLoginButton(String languageCode) {
@@ -600,7 +585,7 @@ class _LoginScreenState extends State<LoginScreen>
         TextButton(
           onPressed: () => Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const RegisterScreen()),
+            MaterialPageRoute(builder: (_) => RegisterScreen(languageCode: languageCode)),
           ),
           child: Text(translate('register', languageCode),
               style: const TextStyle(

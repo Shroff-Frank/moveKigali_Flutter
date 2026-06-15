@@ -1,13 +1,16 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:country_code_picker/country_code_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:movekigali/services/firestore_service.dart';
-import 'package:movekigali/user_state.dart' as user_state;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:country_code_picker/country_code_picker.dart';
+import 'package:movekigali/screens/dashboard/home_screen.dart';
+import 'package:movekigali/screens/login/register/login_screen.dart';
+import 'package:movekigali/screens/shared/loading_screen.dart';
 import 'package:movekigali/utils/localization.dart';
-import '../../dashboard/home_screen.dart';
-import 'login_screen.dart';
+import 'package:movekigali/user_state.dart' as user_state;
+import 'package:movekigali/services/firestore_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   final String languageCode;
@@ -127,8 +130,20 @@ class _RegisterScreenState extends State<RegisterScreen>
       return;
     }
 
-    setState(() => isLoading = true);
+    if (!mounted) return;
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => const LoadingScreen(
+        label: 'movekigali',
+        message: 'Creating account...',
+      ),
+    ));
 
+    setState(() {
+      isLoading = true;
+      topErrorMessage = null;
+    });
+
+    var authSucceeded = false;
     try {
       // ── 2. Create account in Firebase Auth ──────────────────────────────
       final UserCredential credential = await FirebaseAuth.instance
@@ -177,7 +192,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       await Future.delayed(const Duration(milliseconds: 800));
       if (!mounted) return;
 
-      Navigator.pushAndRemoveUntil(
+      await Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (_) => HomeScreen(
@@ -188,6 +203,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         ),
         (route) => false, // remove all previous routes
       );
+      authSucceeded = true;
 
     } on FirebaseAuthException catch (e) {
       // ── Firebase Auth errors with friendly messages ─────────────────────
@@ -219,7 +235,9 @@ class _RegisterScreenState extends State<RegisterScreen>
       debugPrint('Register error: $e');
 
     } finally {
-      if (mounted) setState(() => isLoading = false);
+      if (mounted && !authSucceeded) {
+        Navigator.of(context).pop();
+      }
     }
   }
 
@@ -310,7 +328,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   const Text(
-                                    'moveKigali Account',
+                                    'Fungura konti yawe ya\nmoveKigali',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 24,
@@ -344,35 +362,31 @@ class _RegisterScreenState extends State<RegisterScreen>
                                         ),
                                       ),
                                     ),
-                                  fieldLabel(translate('full_name', languageCode)),
+                                  fieldLabel('${translate('full_name', languageCode)} *'),
                                   cardInputField(
                                     nameController,
-                                    requiredHint(translate('full_name', languageCode)),
+                                    translate('full_name', languageCode),
                                     Icons.person,
                                     onChanged: (_) => _clearError(),
                                   ),
                                   const SizedBox(height: 16),
-                                  fieldLabel(translate('email_address', languageCode)),
+                                  fieldLabel('${translate('email_address', languageCode)} *'),
                                   cardInputField(
                                     emailController,
-                                    requiredHint(translate('email_address', languageCode)),
+                                    translate('email_address', languageCode),
                                     Icons.email,
                                     onChanged: (_) => _clearError(),
                                   ),
                                   const SizedBox(height: 16),
-                                  fieldLabel(translate('phone', languageCode)),
+                                  fieldLabel('${translate('phone', languageCode)} *'),
                                   phoneField(languageCode),
                                   const SizedBox(height: 16),
-                                  fieldLabel(translate('password', languageCode)),
+                                  fieldLabel('${translate('password', languageCode)} *'),
                                   passwordField(languageCode),
                                   const SizedBox(height: 8),
                                   passwordRequirements(),
                                   const SizedBox(height: 16),
-                                  fieldLabel(translate('confirm_password', languageCode)),
-                                  confirmPasswordField(languageCode),
-                                  const SizedBox(height: 18),
-                                  termsRow(languageCode),
-                                  const SizedBox(height: 20),
+                        const SizedBox(height: 20),
                                   loadingBranding(),
                                   animatedSignUpButton(languageCode),
                                   const SizedBox(height: 12),
@@ -387,7 +401,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                         onPressed: () => Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (_) => const LoginScreen(),
+                                            builder: (_) => LoginScreen(languageCode: languageCode),
                                           ),
                                         ),
                                         child: Text(
@@ -473,7 +487,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 maxLengthEnforcement: MaxLengthEnforcement.enforced,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
-                  hintText: requiredHint(translate('phone_number', languageCode)),
+                  hintText: translate('phone_number', languageCode),
                   border: InputBorder.none,
                   counterText: '',
                 ),
@@ -483,10 +497,6 @@ class _RegisterScreenState extends State<RegisterScreen>
         ),
       ),
     );
-  }
-
-  Widget passwordGuidelines(String languageCode) {
-    return const SizedBox.shrink();
   }
 
   Widget passwordRequirements() {
@@ -523,7 +533,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         obscureText: hidePassword,
         style: const TextStyle(color: Colors.black87),
         decoration: InputDecoration(
-          hintText: requiredHint(translate('password', languageCode)),
+          hintText: translate('password', languageCode),
           hintStyle: const TextStyle(color: Colors.black45),
           prefixIcon: const Icon(Icons.lock, color: Colors.black45),
           suffixIcon: IconButton(
@@ -545,35 +555,6 @@ class _RegisterScreenState extends State<RegisterScreen>
   String requiredHint(String value) {
     final trimmed = value.trim();
     return trimmed.endsWith('*') ? trimmed : '$trimmed *';
-  }
-
-  Widget confirmPasswordField(String languageCode) {
-    return Material(
-      elevation: 6,
-      borderRadius: BorderRadius.circular(16),
-      shadowColor: Colors.black26,
-      child: TextField(
-        controller: confirmController,
-        obscureText: hideConfirm,
-        style: const TextStyle(color: Colors.black87),
-        decoration: InputDecoration(
-          hintText: requiredHint(translate('confirm_password', languageCode)),
-          hintStyle: const TextStyle(color: Colors.black45),
-          prefixIcon: const Icon(Icons.lock, color: Colors.black45),
-          suffixIcon: IconButton(
-            icon: Icon(
-                hideConfirm ? Icons.visibility_off : Icons.visibility,
-                color: Colors.black45),
-            onPressed: () => setState(() => hideConfirm = !hideConfirm),
-          ),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none),
-        ),
-      ),
-    );
   }
 
   Widget termsRow(String languageCode) {
@@ -603,30 +584,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   Widget loadingBranding() {
-    return isLoading
-        ? Column(
-            children: const [
-              Text(
-                'movekigali',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 8),
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2.5,
-                ),
-              ),
-              SizedBox(height: 12),
-            ],
-          )
-        : const SizedBox.shrink();
+    return const SizedBox.shrink();
   }
 
   Widget animatedSignUpButton(String languageCode) {

@@ -18,7 +18,6 @@ import 'screens/startscreen/splash_screen.dart';
 import 'screens/startscreen/onboarding_screen.dart';
 
 // Auth screens
-import 'screens/login/register/login.dart';
 import 'screens/login/register/login_screen.dart';
 import 'screens/login/register/register_screen.dart';
 import 'screens/login/register/forgotpassword.dart';
@@ -197,7 +196,7 @@ class _MyAppState extends State<MyApp> {
           '/splash': (_) => const SplashScreen(),
           '/onboarding': (_) => const OnboardingScreen(),
 
-          '/login': (_) => const Login(),
+          '/login': (_) => const LoginScreen(),
           '/login_screen': (_) => const LoginScreen(),
           '/register': (_) => const RegisterScreen(),
           '/forgot_password': (_) => const ForgotPasswordScreen(),

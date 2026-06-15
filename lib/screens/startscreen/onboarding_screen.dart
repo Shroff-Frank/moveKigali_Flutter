@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:movekigali/utils/localization.dart';
-import '../login/register/login.dart';
+import '../login/register/login_screen.dart';
 import '../login/register/register_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -18,6 +18,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   late Animation<Color?> _color1;
   late Animation<Color?> _color2;
   String selectedLanguage = 'rw';
+  int onboardingStep = 0;
 
   @override
   void initState() {
@@ -78,7 +79,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       if (!mounted) return;
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => Login(languageCode: selectedLanguage)),
+                        MaterialPageRoute(builder: (_) => LoginScreen(languageCode: selectedLanguage)),
                       );
                     },
                     child: const Text(
@@ -91,140 +92,200 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             ),
             Expanded(
               child: LayoutBuilder(
-                builder: (context, constraints) => SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 10),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Image.asset(
-                            'assets/images/logo1.png',
-                            width: 110,
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 10),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Image.asset(
+                              'assets/images/logo1.png',
+                              width: 110,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              buildPage(
-                                image: "assets/images/anywhere.png",
-                                title: "Book Bus Tickets\nFrom Anywhere",
-                                subtitle:
-                                    "Book through moveKigali and get tickets delivered directly to your doorstep.",
-                                screenWidth: screenWidth,
-                                screenHeight: screenHeight,
-                              ),
-                              const SizedBox(height: 18),
-                              buildPage(
-                                image: "assets/images/track.png",
-                                title: "Track Your Trip\nIn Real Time",
-                                subtitle:
-                                    "Monitor your location and trip status live. Never miss your destination again.",
-                                screenWidth: screenWidth,
-                                screenHeight: screenHeight,
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Animated Button
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: AnimatedBuilder(
-                            animation: _controller,
-                            builder: (context, child) => Container(
-                              height: 55,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                gradient: LinearGradient(
-                                  colors: [_color1.value!, _color2.value!],
-                                ),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 8,
-                                    offset: Offset(0, 4),
+                          const SizedBox(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const SizedBox(height: 10),
+                                if (onboardingStep == 0) ...[
+                                  buildPage(
+                                    image: "assets/images/anywhere.png",
+                                    title: "Book Bus Tickets\nFrom Anywhere",
+                                    subtitle:
+                                        "Book through moveKigali and get tickets delivered directly to your doorstep.",
+                                    screenWidth: screenWidth,
+                                    screenHeight: screenHeight,
                                   ),
-                                ],
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(16),
-                                  onTap: () {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(builder: (_) => Login(languageCode: selectedLanguage)),
-                                    );
-                                  },
-                                  child: const Center(
+                                  const SizedBox(height: 32),
+                                  AnimatedBuilder(
+                                    animation: _controller,
+                                    builder: (context, child) {
+                                      return Container(
+                                        height: 55,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(16),
+                                          gradient: LinearGradient(
+                                            colors: [_color1.value!, _color2.value!],
+                                          ),
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color: Colors.black26,
+                                              blurRadius: 8,
+                                              offset: Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.circular(16),
+                                            onTap: () => setState(() => onboardingStep = 1),
+                                            child: const Center(
+                                              child: Text(
+                                                "Get Started",
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                  letterSpacing: 1.2,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ] else ...[
+                                  buildPage(
+                                    image: "assets/images/track.png",
+                                    title: "Track Your Trip\nIn Real Time",
+                                    subtitle:
+                                        "Monitor your location and trip status live. Never miss your destination again.",
+                                    screenWidth: screenWidth,
+                                    screenHeight: screenHeight,
+                                  ),
+                                  const SizedBox(height: 32),
+                                  AnimatedBuilder(
+                                    animation: _controller,
+                                    builder: (context, child) {
+                                      return Container(
+                                        height: 55,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(16),
+                                          gradient: LinearGradient(
+                                            colors: [_color1.value!, _color2.value!],
+                                          ),
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color: Colors.black26,
+                                              blurRadius: 8,
+                                              offset: Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.circular(16),
+                                            onTap: () async {
+                                              final prefs = await SharedPreferences.getInstance();
+                                              await prefs.setBool('seenOnboarding', true);
+                                              if (!mounted) return;
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(builder: (_) => LoginScreen(languageCode: selectedLanguage)),
+                                              );
+                                            },
+                                            child: const Center(
+                                              child: Text(
+                                                "Continue",
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                  letterSpacing: 1.2,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 16),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      final prefs = await SharedPreferences.getInstance();
+                                      await prefs.setBool('seenOnboarding', true);
+                                      if (!mounted) return;
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => RegisterScreen(languageCode: selectedLanguage)),
+                                      );
+                                    },
                                     child: Text(
-                                      "Get Started",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        letterSpacing: 1.2,
+                                      '${translate('dont_have_account', selectedLanguage)} ${translate('register', selectedLanguage)}',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 15,
+                                        decoration: TextDecoration.underline,
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
+                                ],
+                                const SizedBox(height: 20),
+                                buildPageIndicator(),
+                              ],
                             ),
                           ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Register
-                        GestureDetector(
-                          onTap: () async {
-                            final prefs = await SharedPreferences.getInstance();
-                            await prefs.setBool('seenOnboarding', true);
-                            if (!mounted) return;
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => RegisterScreen(languageCode: selectedLanguage)),
-                            );
-                          },
-                          child: const Text(
-                            "Don't have an account? Register Account",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 15,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 25),
-
-                        // Bottom handle
-                        Container(
-                          width: 100,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.white70,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget buildPageIndicator() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            width: onboardingStep == 0 ? 16 : 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: onboardingStep == 0 ? Colors.orangeAccent : Colors.white54,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          const SizedBox(width: 8),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            width: onboardingStep == 1 ? 16 : 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: onboardingStep == 1 ? Colors.orangeAccent : Colors.white54,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ],
       ),
     );
   }

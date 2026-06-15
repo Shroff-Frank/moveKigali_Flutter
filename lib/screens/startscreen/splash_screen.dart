@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../login/register/login.dart';
+import '../login/register/login_screen.dart';
 import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _prepareLaunchTarget() async {
     final prefs = await SharedPreferences.getInstance();
     final seenOnboarding = prefs.getBool('seenOnboarding') ?? false;
-    final nextScreen = seenOnboarding ? const Login() : const OnboardingScreen();
+    final nextScreen = seenOnboarding ? const LoginScreen() : const OnboardingScreen();
 
     if (!mounted) return;
     Timer(const Duration(seconds: 4), () {
