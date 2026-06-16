@@ -569,7 +569,7 @@ class _LoginScreenState extends State<LoginScreen>
                     ? const SizedBox(
                         width: 24, height: 24,
                         child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2.5))
+                            color: Colors.orangeAccent, strokeWidth: 2.5))
                     : Text(
                         translate('sign_in', languageCode),
                         style: const TextStyle(

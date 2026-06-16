@@ -820,11 +820,15 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: _kTeal,
+              foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 48),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text(translate('close', _language)),
+            child: Text(
+              translate('close', _language),
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
           ),
         ]),
       ),
@@ -923,17 +927,39 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: _dmCard,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title:   Text(translate('logout', _language), style: TextStyle(color: _dmText)),
-        content: Text(translate('logout_confirmation', _language),
-            style: TextStyle(color: _dmSubText)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          translate('logout', _language), 
+          style: TextStyle(
+            color: _dmText, 
+            fontSize: 20, 
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            translate('logout_confirmation', _language),
+            style: TextStyle(color: _dmSubText, fontSize: 15, height: 1.5),
+          ),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(translate('cancel', _language))),
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              backgroundColor: _dmInput,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(
+              translate('cancel', _language),
+              style: TextStyle(color: _dmText, fontWeight: FontWeight.w600),
+            ),
+          ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context); // close dialog
+              Navigator.pop(context);
               _closeDrawer();
               await FirebaseAuth.instance.signOut();
               Navigator.of(context).pushNamedAndRemoveUntil(
@@ -941,8 +967,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 (route) => false,
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(translate('logout', _language)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(
+              translate('logout', _language),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -1142,8 +1178,10 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.white.withAlpha(30),
               shape: BoxShape.circle,
             ),
-            child: FaIcon(FontAwesomeIcons.bell,
-              size: 40 * 0.44, color: Colors.white),
+            child: Center(
+              child: FaIcon(FontAwesomeIcons.bell,
+                size: 40 * 0.44, color: Colors.white),
+            ),
           ),
           if (_unreadCount > 0)
             Positioned(
@@ -1182,9 +1220,11 @@ class _HomeScreenState extends State<HomeScreen> {
           color: bg ?? Colors.white.withAlpha(30),
           shape: BoxShape.circle,
         ),
-        child: icon is FaIconData
-            ? FaIcon(icon, size: size * 0.44, color: fg ?? Colors.white)
-            : Icon(icon, size: size * 0.44, color: fg ?? Colors.white),
+        child: Center(
+          child: icon is FaIconData
+              ? FaIcon(icon, size: size * 0.44, color: fg ?? Colors.white)
+              : Icon(icon, size: size * 0.44, color: fg ?? Colors.white),
+        ),
       ),
     );
   }
@@ -1294,8 +1334,8 @@ class _HomeScreenState extends State<HomeScreen> {
           idx: 2,
           icon: Icons.person_rounded,
           hint: _t('select_passengers'),
-          value: '$_people ${_t('passengers')}',
-          hasVal: true,
+          value: _people > 0 ? '$_people Abagenzi' : '',
+          hasVal: _people > 0,
           onTap: _openPassPicker,
         ),
 
@@ -1552,7 +1592,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   _chip(Icons.restaurant, '1 ${_t('meal')}', Colors.orange),
                   const SizedBox(width: 8),
                   _chip(Icons.person,
-                      '$_people Passenger${_people > 1 ? 's' : ''}',
+                      _language == 'rw'
+                          ? '$_people ${_people == 1 ? 'Umugenzi' : 'Abagenzi'}'
+                          : '$_people Passenger${_people > 1 ? 's' : ''}',
                       _kTeal),
                 ]),
                 GestureDetector(
@@ -1651,7 +1693,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (!hasHistory) ...[
           // Empty state — shown until first booking is made
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: const EdgeInsets.symmetric(vertical: 4),
             child: Column(children: [
               Container(
                 width: 72, height: 72,
@@ -1885,8 +1927,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         : Colors.grey.shade100,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.close,
-                      color: _kTeal, size: 20),
+                  child: const Center(
+                    child: Icon(Icons.close,
+                        color: _kTeal, size: 20),
+                  ),
                 ),
               ),
             ]),
@@ -3515,7 +3559,9 @@ ${translate('payment', languageCode)}: ${booking.paymentMethod}
                                         width: 46,
                                         height: 46,
                                         decoration: BoxDecoration(color: _kTeal.withAlpha(20), borderRadius: BorderRadius.circular(14)),
-                                        child: const Icon(Icons.qr_code, color: _kTeal, size: 26),
+                                        child: const Center(
+                                          child: Icon(Icons.qr_code, color: _kTeal, size: 26),
+                                        ),
                                       ),
                                       const SizedBox(width: 14),
                                       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -5447,19 +5493,19 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     ),
                   ]),
                   const Divider(height: 22),
-                  priceRow(translate('total_ticket', widget.languageCode), 'RWF ${_fmtPrice(widget.slot.priceRfw)}'),
-                  priceRow(translate('service_fee', widget.languageCode), 'RWF ${_fmtPrice(_serviceFee)}'),
-                  priceRow(translate('voucher', widget.languageCode), '-RWF 0', valColor: Colors.green),
+                  priceRow(translate('total_ticket', widget.languageCode), '${_fmtPrice(widget.slot.priceRfw)} RWF'),
+                  priceRow(translate('service_fee', widget.languageCode), '${_fmtPrice(_serviceFee)} RWF'),
+                  priceRow(translate('voucher', widget.languageCode), '-0 RWF', valColor: Colors.green),
                   if (_useBuspoint && _buspointEligible)
-                    priceRow(translate('buspoint_discount', widget.languageCode), '-RWF ${_fmtPrice(_buspointDiscount)}', valColor: Colors.green),
+                    priceRow(translate('buspoint_discount', widget.languageCode), '-${_fmtPrice(_buspointDiscount)} RWF', valColor: Colors.green),
                   const Divider(height: 16),
-                  priceRow(translate('total_cost', widget.languageCode), 'RWF ${_fmtPrice(_totalCost)}', bold: true, valColor: _kTeal),
+                  priceRow(translate('total_cost', widget.languageCode), '${_fmtPrice(_totalCost)} RWF', bold: true, valColor: _kTeal),
                 ]),
               ),
               const SizedBox(height: 8),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Text('${translate('total_price', widget.languageCode)} (${widget.passengers} ${translate('passengers', widget.languageCode)}${widget.passengers > 1 ? 's' : ''})', style: TextStyle(color: subCol, fontSize: 13)),
-                Text('RWF ${_fmtPrice(_totalCost)}', style: const TextStyle(color: _kTeal, fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('${_fmtPrice(_totalCost)} RWF', style: const TextStyle(color: _kTeal, fontWeight: FontWeight.bold, fontSize: 16)),
               ]),
             ]),
           ),
@@ -5498,8 +5544,8 @@ class PaymentMethodScreen extends StatefulWidget {
 class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   String? _selected;
   static const List<Map<String, dynamic>> _methods = [
-    {'id':'mtn_momo',   'labelKey':'mtn_mobile_money','subKey':'pay_via_mtn_mobile_money','image':'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/MTN_Mobile_Money_logo.png/320px-MTN_Mobile_Money_logo.png'},
-    {'id':'airtel_momo','labelKey':'airtel_money','subKey':'pay_via_airtel_money','image':'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Airtel_Money_logo.png/320px-Airtel_Money_logo.png'},
+    {'id':'mtn_momo',   'labelKey':'mtn_mobile_money','subKey':'pay_via_mtn_mobile_money','image':'assets/images/mtnlogo.png'},
+    {'id':'airtel_momo','labelKey':'airtel_money','subKey':'pay_via_airtel_money','image':'assets/images/airtellogo.png'},
     {'id':'card',       'labelKey':'debit_credit_card','subKey':'pay_with_card','image':'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Visa_Logo.png/320px-Visa_Logo.png'},
     {'id':'digital_banking','labelKey':'digital_banking','subKey':'pay_via_digital_banking','image':'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Bank_%28PSF%29_Logo.svg/1200px-Bank_%28PSF%29_Logo.svg.png'},
   ];
@@ -5544,32 +5590,44 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   Widget _payIcon(String icon, bool sel, String? imageUrl) {
     if (imageUrl != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.network(imageUrl, width: 44, height: 44, fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => Icon(Icons.payment_rounded, color: sel ? _kTeal : Colors.grey.shade600, size: 26),
-        ),
-      );
+      // Check if it's an asset image or network image
+      if (imageUrl.startsWith('assets/')) {
+        return Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(imageUrl, width: 40, height: 40, fit: BoxFit.contain),
+          ),
+        );
+      } else {
+        return Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(imageUrl, width: 40, height: 40, fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Icon(Icons.payment_rounded, color: sel ? _kTeal : Colors.grey.shade600, size: 24),
+            ),
+          ),
+        );
+      }
     }
     switch(icon) {
-      case 'airtel': return Stack(alignment: Alignment.center, children: [
-        Container(decoration: BoxDecoration(color: const Color(0xFFE60000), borderRadius: BorderRadius.circular(10))),
-        Column(mainAxisAlignment: MainAxisAlignment.center, children: const [
-          Text('Airtel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 10)),
-          Text('Money', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)),
+      case 'mtn_momo': return Stack(alignment: Alignment.center, children: [
+        Container(decoration: BoxDecoration(color: const Color(0xFFFFCC00), borderRadius: BorderRadius.circular(8))),
+        const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text('MTN', style: TextStyle(color: Color(0xFF003087), fontWeight: FontWeight.w900, fontSize: 10)),
+          Text('MoMo', style: TextStyle(color: Color(0xFF003087), fontWeight: FontWeight.bold, fontSize: 7)),
         ]),
       ]);
-      case 'mtn': return Stack(alignment: Alignment.center, children: [
-        Container(decoration: BoxDecoration(color: const Color(0xFFFFCC00), borderRadius: BorderRadius.circular(10))),
-        Column(mainAxisAlignment: MainAxisAlignment.center, children: const [
-          Text('MTN', style: TextStyle(color: Color(0xFF003087), fontWeight: FontWeight.w900, fontSize: 12)),
-          Text('MoMo', style: TextStyle(color: Color(0xFF003087), fontWeight: FontWeight.bold, fontSize: 8)),
+      case 'airtel_momo': return Stack(alignment: Alignment.center, children: [
+        Container(decoration: BoxDecoration(color: const Color(0xFFE60000), borderRadius: BorderRadius.circular(8))),
+        const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text('Airtel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 9)),
+          Text('Money', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 7)),
         ]),
       ]);
-      case 'card': return const Icon(Icons.credit_card, color: _kTeal, size: 26);
-      case 'digital': return Stack(alignment: Alignment.center, children: [
-        Container(decoration: BoxDecoration(color: const Color(0xFF003087), borderRadius: BorderRadius.circular(10))),
-        const Icon(Icons.account_balance, color: Colors.white, size: 24),
+      case 'card': return const Icon(Icons.credit_card, color: _kTeal, size: 24);
+      case 'digital_banking': return Stack(alignment: Alignment.center, children: [
+        Container(decoration: BoxDecoration(color: const Color(0xFF003087), borderRadius: BorderRadius.circular(8))),
+        const Icon(Icons.account_balance, color: Colors.white, size: 20),
       ]);
       default: return const Icon(Icons.payment_rounded, color: _kTeal, size: 24);
     }
@@ -5588,19 +5646,22 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       appBar: AppBar(
         backgroundColor: widget.isDark ? const Color(0xFF111C22) : _kTeal,
         foregroundColor: Colors.white, elevation: 0, centerTitle: true,
-        title: Text(translate('payment_method_title', widget.languageCode), style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(translate('payment_method', widget.languageCode), style: const TextStyle(fontWeight: FontWeight.bold)),
         leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new_rounded), onPressed: () => Navigator.pop(context)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const SizedBox(height: 8),
-          Text(translate('how_would_you_like_to_pay', widget.languageCode), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textCol)),
+          Text(translate('how_to_pay', widget.languageCode), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textCol)),
           const SizedBox(height: 20),
           Expanded(child: ListView(children: _methods.map((m) {
             final isSel = _selected == m['id'] as String;
             return GestureDetector(
-              onTap: () => setState(() => _selected = m['id'] as String),
+              onTap: () {
+                setState(() => _selected = m['id'] as String);
+                Future.delayed(const Duration(milliseconds: 100), _confirm);
+              },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 margin: const EdgeInsets.only(bottom: 12),
@@ -5631,7 +5692,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white, elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
               child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text('Pay RWF ${_fmtPrice(widget.totalCost)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Pay ${_fmtPrice(widget.totalCost)} RWF', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(width: 6), const Icon(Icons.arrow_forward_rounded, size: 18),
               ]),
             )),
@@ -5652,11 +5713,34 @@ class _MobileMoneySheet extends StatefulWidget {
   @override
   State<_MobileMoneySheet> createState() => _MobileMoneySheetState();
 }
+
+String _generateBillId() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  final random = DateTime.now().millisecondsSinceEpoch % 100000;
+  final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(0, 8);
+  return 'BL${timestamp}${random.toString().padLeft(5, '0')}';
+}
+
 class _MobileMoneySheetState extends State<_MobileMoneySheet> {
   final _ctrl = TextEditingController();
-  bool _saved = false;
+  late String _billId;
+  
+  @override
+  void initState() {
+    super.initState();
+    _billId = _generateBillId();
+    _ctrl.addListener(() => setState(() {})); // Rebuild on input change
+  }
+  
   @override
   void dispose() { _ctrl.dispose(); super.dispose(); }
+
+  void _copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(translate('copied_to_clipboard', widget.languageCode)), 
+        backgroundColor: Colors.green, behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 1)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -5665,77 +5749,108 @@ class _MobileMoneySheetState extends State<_MobileMoneySheet> {
     final subCol = widget.isDark ? const Color(0xFF4A6A7A) : Colors.grey.shade500;
     final borderC = widget.isDark ? const Color(0xFF2A3E4A) : Colors.grey.shade200;
     final inputBg = widget.isDark ? const Color(0xFF1E2E38) : Colors.grey.shade50;
+    final ussdCode = '#182*1*1*$_billId#';
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
         decoration: BoxDecoration(color: bg, borderRadius: const BorderRadius.vertical(top: Radius.circular(28))),
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(margin: const EdgeInsets.only(top: 12, bottom: 16), width: 36, height: 4,
-              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
-          Container(width: 64, height: 64, decoration: BoxDecoration(color: widget.method == 'airtel_momo' ? const Color(0xFFE60000) : const Color(0xFFFFCC00), borderRadius: BorderRadius.circular(18)),
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text(widget.method == 'airtel_momo' ? 'Airtel' : 'MTN', style: TextStyle(color: widget.method == 'airtel_momo' ? Colors.white : const Color(0xFF003087), fontWeight: FontWeight.w900, fontSize: 16)),
-              Text(widget.method == 'airtel_momo' ? 'Money' : 'MoMo', style: TextStyle(color: widget.method == 'airtel_momo' ? Colors.white : const Color(0xFF003087), fontWeight: FontWeight.bold, fontSize: 10)),
-            ])),
-          const SizedBox(height: 14),
-          Text(widget.method == 'airtel_momo' ? translate('airtel_money', widget.languageCode) : translate('mtn_mobile_money', widget.languageCode), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textCol)),
-          const SizedBox(height: 4),
-          Text(widget.method == 'airtel_momo' ? translate('enter_airtel_account_number', widget.languageCode) : translate('enter_mtn_account_number', widget.languageCode), style: TextStyle(fontSize: 13, color: subCol)),
-          const SizedBox(height: 12),
-          Text(translate('after_pay_prompt', widget.languageCode), style: TextStyle(fontSize: 12, color: subCol)),
-          const SizedBox(height: 20),
-          Container(
-            decoration: BoxDecoration(color: inputBg, borderRadius: BorderRadius.circular(14), border: Border.all(color: borderC)),
-            child: Row(children: [
-              Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                decoration: BoxDecoration(border: Border(right: BorderSide(color: borderC))),
-                child: const Row(children: [
-                  Text('🇷🇼', style: TextStyle(fontSize: 20)),
-                  SizedBox(width: 4),
-                  Text('+250', style: TextStyle(color: _kTeal, fontWeight: FontWeight.w600, fontSize: 13)),
-                ])),
-              Expanded(child: TextField(controller: _ctrl, keyboardType: TextInputType.phone,
-                style: TextStyle(fontSize: 15, color: textCol),
-                decoration: InputDecoration(
-                  hintText: widget.method == 'airtel_momo' ? '072XXXXXXX' : '078/9XXXXXXX',
-                  hintStyle: TextStyle(color: subCol),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                ))),
-              Padding(padding: const EdgeInsets.only(right: 8),
-                child: TextButton(
-                  onPressed: () { setState(() => _saved = true); FocusScope.of(context).unfocus(); },
-                  style: TextButton.styleFrom(foregroundColor: _kTeal),
-                  child: Text(translate('save', widget.languageCode), style: const TextStyle(fontWeight: FontWeight.bold)))),
-            ]),
-          ),
-          if (_saved) ...[
-            const SizedBox(height: 10),
-            Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(color: Colors.green.withAlpha(20), borderRadius: BorderRadius.circular(10)),
-              child: Row(children: [
-                const Icon(Icons.check_circle, color: Colors.green, size: 16), const SizedBox(width: 6),
-                Text(translate('number_saved', widget.languageCode), style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 13)),
+        child: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Container(margin: const EdgeInsets.only(top: 12, bottom: 16), width: 36, height: 4,
+                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+            Container(width: 64, height: 64, decoration: BoxDecoration(color: widget.method == 'airtel_momo' ? const Color(0xFFE60000) : const Color(0xFFFFCC00), borderRadius: BorderRadius.circular(18)),
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Text(widget.method == 'airtel_momo' ? 'Airtel' : 'MTN', style: TextStyle(color: widget.method == 'airtel_momo' ? Colors.white : const Color(0xFF003087), fontWeight: FontWeight.w900, fontSize: 16)),
+                Text(widget.method == 'airtel_momo' ? 'Money' : 'MoMo', style: TextStyle(color: widget.method == 'airtel_momo' ? Colors.white : const Color(0xFF003087), fontWeight: FontWeight.bold, fontSize: 10)),
               ])),
-          ],
-          const SizedBox(height: 20),
-          SizedBox(width: double.infinity, height: 52,
-            child: ElevatedButton(
-              onPressed: () {
-                final num = _ctrl.text.trim();
-                if (num.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translate('please_enter_phone_number', widget.languageCode)), backgroundColor: Colors.orange, behavior: SnackBarBehavior.floating));
-                  return;
-                }
-                Navigator.pop(context, '+250 $num');
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFCC00), foregroundColor: const Color(0xFF003087), elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-              child: Text('Pay RWF ${_fmtPrice(widget.amount)}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            )),
-        ]),
+            const SizedBox(height: 14),
+            Text(widget.method == 'airtel_momo' ? translate('airtel_money', widget.languageCode) : translate('mtn_mobile_money', widget.languageCode), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textCol)),
+            const SizedBox(height: 4),
+            Text(widget.method == 'airtel_momo' ? translate('enter_airtel_account_number', widget.languageCode) : translate('enter_mtn_account_number', widget.languageCode), style: TextStyle(fontSize: 13, color: subCol)),
+            const SizedBox(height: 20),
+            
+            // Option 1: Phone Number (with label on left)
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text('${translate('option', widget.languageCode)} 1:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: textCol)),
+              Expanded(child: Text(
+                widget.method == 'airtel_momo' ? translate('enter_airtel_account_number', widget.languageCode) : translate('enter_mtn_number', widget.languageCode),
+                textAlign: TextAlign.end,
+                style: TextStyle(fontSize: 12, color: subCol),
+              )),
+            ]),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(color: inputBg, borderRadius: BorderRadius.circular(14), border: Border.all(color: borderC)),
+              child: Row(children: [
+                Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  decoration: BoxDecoration(border: Border(right: BorderSide(color: borderC))),
+                  child: const Row(children: [
+                    Text('🇷🇼', style: TextStyle(fontSize: 20)),
+                    SizedBox(width: 4),
+                    Text('+250', style: TextStyle(color: _kTeal, fontWeight: FontWeight.w600, fontSize: 13)),
+                  ])),
+                Expanded(child: TextField(controller: _ctrl, keyboardType: TextInputType.phone,
+                  style: TextStyle(fontSize: 15, color: textCol),
+                  onChanged: (val) {
+                    // Limit to 9 digits
+                    if (val.length > 9) {
+                      _ctrl.text = val.substring(0, 9);
+                      _ctrl.selection = TextSelection.fromPosition(TextPosition(offset: 9));
+                    }
+                  },
+                  decoration: InputDecoration(
+                    hintText: widget.method == 'airtel_momo' ? '72xxxxxxx' : '78/9xxxxxxx',
+                    hintStyle: TextStyle(color: subCol),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  ))),
+              ]),
+            ),
+            const SizedBox(height: 14),
+            Text(translate('after_you_click_pay', widget.languageCode), style: TextStyle(fontSize: 12, color: subCol)),
+            const SizedBox(height: 16),
+            SizedBox(width: double.infinity, height: 52,
+              child: ElevatedButton(
+                onPressed: _ctrl.text.trim().length == 9 ? () {
+                  final num = _ctrl.text.trim();
+                  Navigator.pop(context, '+250 $num');
+                } : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _ctrl.text.trim().length == 9 ? const Color(0xFFFFCC00) : Colors.grey.shade300,
+                  foregroundColor: _ctrl.text.trim().length == 9 ? const Color(0xFF003087) : Colors.grey.shade500,
+                  elevation: _ctrl.text.trim().length == 9 ? 0 : 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))
+                ),
+                child: Text('${translate('pay', widget.languageCode)} ${_fmtPrice(widget.amount)} RWF', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: _ctrl.text.trim().length == 9 ? const Color(0xFF003087) : Colors.grey.shade500)),
+              )),
+            const SizedBox(height: 16),
+            
+            // Option 2: USSD Code
+            Text('${translate('option', widget.languageCode)} 2: ${translate('dial_this_on_your', widget.languageCode) ?? 'Dial this on your'} ${widget.method == 'airtel_momo' ? 'Airtel' : 'MTN'} ${translate('phone_to_pay', widget.languageCode) ?? 'phone to pay'}', 
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: textCol)),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(color: inputBg, borderRadius: BorderRadius.circular(14), border: Border.all(color: borderC)),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(children: [
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(ussdCode, 
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: textCol, letterSpacing: 1),
+                    selectionColor: Colors.grey.shade300),
+                ])),
+                const SizedBox(width: 12),
+                IconButton(
+                  onPressed: () => _copyToClipboard(ussdCode),
+                  icon: const Icon(Icons.content_copy_rounded, size: 20, color: _kTeal),
+                  tooltip: translate('copy', widget.languageCode),
+                ),
+              ]),
+            ),
+            const SizedBox(height: 20),
+          ]),
+        ),
       ),
     );
   }

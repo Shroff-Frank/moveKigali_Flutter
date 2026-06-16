@@ -148,6 +148,17 @@ class _RegisterScreenState extends State<RegisterScreen>
               : null);
       passwordFieldError = passwordErrorText;
       confirmFieldError = confirmErrorText;
+      
+      // Clear password fields if validation fails
+      if (passwordFieldError != null) {
+        passwordController.clear();
+        confirmController.clear();
+        hidePassword = true;
+        hideConfirm = true;
+      } else if (confirmFieldError != null) {
+        confirmController.clear();
+        hideConfirm = true;
+      }
     });
 
     if (nameFieldError != null ||
@@ -155,12 +166,6 @@ class _RegisterScreenState extends State<RegisterScreen>
         phoneFieldError != null ||
         passwordFieldError != null ||
         confirmFieldError != null) {
-      if (passwordFieldError != null) {
-        passwordController.clear();
-        confirmController.clear();
-      } else if (confirmFieldError != null) {
-        confirmController.clear();
-      }
       return;
     }
 
@@ -361,9 +366,11 @@ class _RegisterScreenState extends State<RegisterScreen>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  const Text(
-                                    'Fungura konti yawe ya\nmoveKigali',
-                                    style: TextStyle(
+                                  Text(
+                                    languageCode == 'en'
+                                        ? 'Create your account of\nmoveKigali'
+                                        : 'Fungura konti yawe ya\nmoveKigali',
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
@@ -371,9 +378,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 8),
-                                  const Text(
-                                    'Andika umwirondo wawe kugira ngo ukomeze',
-                                    style: TextStyle(
+                                  Text(
+                                    translate('register_subtitle', languageCode),
+                                    style: const TextStyle(
                                       color: Colors.white70,
                                       fontSize: 13,
                                     ),
@@ -684,7 +691,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2.5))
+                            color: Colors.orangeAccent, strokeWidth: 2.5))
                     : Text(
                         translate('sign_up', languageCode),
                         style: const TextStyle(
